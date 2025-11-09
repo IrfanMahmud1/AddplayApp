@@ -7,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .WithOrigins("http://localhost:5175") // your React dev server
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -19,6 +28,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 app.MapPost("/api/users/create-user", async (User u, AppDbContext db) =>
 {
